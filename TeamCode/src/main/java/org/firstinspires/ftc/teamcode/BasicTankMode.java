@@ -54,10 +54,7 @@ public class BasicTankMode extends OpMode
 {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor frontLeftDrive = null;
-    private DcMotor frontRightDrive = null;
-    private DcMotor backLeftDrive = null;
-    private DcMotor backRightDrive = null;
+    private CadetHardware robot = new CadetHardware();
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -66,20 +63,7 @@ public class BasicTankMode extends OpMode
     public void init() {
         telemetry.addData("Status", "Initialized Start");
 
-        // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must correspond to the names assigned during the robot configuration
-        // step (using the FTC Robot Controller app on the phone).
-        frontLeftDrive = hardwareMap.get(DcMotor.class, "FrontLeftDrive");
-        frontRightDrive = hardwareMap.get(DcMotor.class, "FrontRightDrive");
-        backLeftDrive = hardwareMap.get(DcMotor.class, "BackLeftDrive");
-        backRightDrive = hardwareMap.get(DcMotor.class, "BackRightDrive");
-
-        // Most robots need the motor on one side to be reversed to drive forward
-        // Reverse the motor that runs backwards when connected directly to the battery
-        frontLeftDrive.setDirection(DcMotor.Direction.FORWARD);
-        frontRightDrive.setDirection(DcMotor.Direction.REVERSE);
-        backLeftDrive.setDirection(DcMotor.Direction.FORWARD);
-        backRightDrive.setDirection(DcMotor.Direction.REVERSE);
+        robot.init(hardwareMap);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized Complete");
@@ -125,15 +109,14 @@ public class BasicTankMode extends OpMode
 //        rightPower = -gamepad1.right_stick_y ;
 
         // Send calculated power to wheels
-        frontLeftDrive.setPower(leftPower);
-        frontRightDrive.setPower(rightPower);
-        backLeftDrive.setPower(leftPower);
-        backRightDrive.setPower(rightPower);
+        robot.frontLeftDrive.setPower(leftPower);
+        robot.frontRightDrive.setPower(rightPower);
+        robot.backLeftDrive.setPower(leftPower);
+        robot.backRightDrive.setPower(rightPower);
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-        telemetry.addData("10-4", gamepad2.dpad_down);
     }
 
     /*
