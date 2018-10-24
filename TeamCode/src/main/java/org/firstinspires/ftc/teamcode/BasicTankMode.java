@@ -114,6 +114,8 @@ public class BasicTankMode extends OpMode
         robot.backLeftDrive.setPower(leftPower);
         robot.backRightDrive.setPower(rightPower);
 
+        lift();
+
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
@@ -126,4 +128,13 @@ public class BasicTankMode extends OpMode
     public void stop() {
     }
 
+    public void lift() {
+        if (gamepad2.b) {
+            robot.liftMotor.setPower(1);
+        }
+        if (!robot.digitalChannelDown.getState()){
+            robot.liftMotor.setPower(0);
+        }
+        telemetry.addData("Lift", "Power: " + robot.liftMotor.getPower());
+    }
 }
