@@ -89,6 +89,8 @@ public class CadetHardware
         liftMotor = hwMap.get(DcMotor.class, "LiftMotor");
         digitalChannelUp = hwMap.get(DigitalChannel.class, "DigitalChannelUp");
         digitalChannelDown = hwMap.get(DigitalChannel.class, "DigitalChannelDown");
+        digitalChannelUp.setMode(DigitalChannel.Mode.INPUT);
+        digitalChannelDown.setMode(DigitalChannel.Mode.INPUT);
 
         frontLeftDrive.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
         frontRightDrive.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
