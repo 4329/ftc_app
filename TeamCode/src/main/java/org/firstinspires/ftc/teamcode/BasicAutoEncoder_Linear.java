@@ -112,7 +112,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        robot.liftMotor.setPower(-1);
+        robot.liftMotor.setPower(CadetConstants.LIFT_MOTOR_POWER_UP);
 
         while (opModeIsActive()) {
             if (!robot.digitalChannelUp.getState()) {
