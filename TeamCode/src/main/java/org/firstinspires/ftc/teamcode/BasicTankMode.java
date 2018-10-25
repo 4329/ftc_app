@@ -129,10 +129,16 @@ public class BasicTankMode extends OpMode
     }
 
     public void lift() {
-        if (gamepad2.b) {
+        if (gamepad2.y) {
             robot.liftMotor.setPower(1);
         }
         if (!robot.digitalChannelDown.getState()){
+            robot.liftMotor.setPower(0);
+        }
+        if (gamepad2.a) {
+            robot.liftMotor.setPower(-1);
+        }
+        if (!robot.digitalChannelUp.getState()){
             robot.liftMotor.setPower(0);
         }
         telemetry.addData("Lift", "Power: " + robot.liftMotor.getPower());
