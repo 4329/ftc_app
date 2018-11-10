@@ -70,13 +70,14 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
     CadetHardware robot = new CadetHardware();   // Use a Pushbot's hardware
     private ElapsedTime runtime = new ElapsedTime();
 
-    static final double COUNTS_PER_MOTOR_REV = 1440;    // eg: TETRIX Motor Encoder
-    static final double DRIVE_GEAR_REDUCTION = 2.0;     // This is < 1.0 if geared UP
-    static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
+    static final double COUNTS_PER_MOTOR_REV = 1120;    // eg: NeveRest Motor Encoder
+    static final double DRIVE_GEAR_REDUCTION = 1.286;     // This is < 1.0 if geared UP
+    static final double WHEEL_DIAMETER_INCHES = 4;     // For figuring circumference
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double SLOW_SPEED = 0.2;
     static final double DRIVE_SPEED = 0.6;
-    static final double TURN_SPEED = 0.5;
+    static final double TURN_SPEED = 0.2;
 
     @Override
     public void runOpMode() {
@@ -112,21 +113,22 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        robot.liftMotor.setPower(CadetConstants.LIFT_MOTOR_POWER_UP);
-
-        while (opModeIsActive()) {
-            if (!robot.digitalChannelUp.getState()) {
-                robot.liftMotor.setPower(0);
-                break;
-            }
-            idle();
-        }
+//        robot.liftMotor.setPower(CadetConstants.LIFT_MOTOR_POWER_DOWN);
+//        while (opModeIsActive()) {
+//            if (!robot.digitalChannelUp.getState()) {
+//                robot.liftMotor.setPower(0);
+//                break;
+//            }
+//            idle();
+//        }
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        encoderDrive(DRIVE_SPEED, 48, 48, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED, 12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+        encoderDrive(SLOW_SPEED, -2, -2, 10.0);
+        encoderDrive(TURN_SPEED, -9, 9, 4.0);
+        encoderDrive(DRIVE_SPEED, 48, 48, 10.0);  // S1: Forward 47 Inches with 5 Sec timeout
+//        encoderDrive(TURN_SPEED, 12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+//        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
