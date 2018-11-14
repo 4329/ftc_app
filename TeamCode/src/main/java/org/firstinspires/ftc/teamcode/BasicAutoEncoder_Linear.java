@@ -113,14 +113,14 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-//        robot.liftMotor.setPower(CadetConstants.LIFT_MOTOR_POWER_DOWN);
-//        while (opModeIsActive()) {
-//            if (!robot.digitalChannelUp.getState()) {
-//                robot.liftMotor.setPower(0);
-//                break;
-//            }
-//            idle();
-//        }
+        robot.liftMotor.setPower(CadetConstants.LIFT_MOTOR_POWER_DOWN);
+        while (opModeIsActive()) {
+            if (!robot.digitalChannelUp.getState()) {
+                robot.liftMotor.setPower(0);
+                break;
+            }
+            idle();
+        }
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
