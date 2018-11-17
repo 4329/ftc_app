@@ -116,9 +116,22 @@ public class BasicTankMode extends OpMode
 
         lift();
 
+        if (gamepad2.dpad_up) { //Open Scoop
+            robot.scoopServo.setPosition(0);
+        }
+        if (gamepad2.dpad_left) { //Close Scoop
+            robot.scoopServo.setPosition(0.5);
+        }
+        if (gamepad2.dpad_down) { //Under Scoop
+            robot.scoopServo.setPosition(0.75);
+        }
+
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+
+
+        telemetry.addData("Servo", "Position: " + robot.scoopServo.getPosition());
     }
 
     /*

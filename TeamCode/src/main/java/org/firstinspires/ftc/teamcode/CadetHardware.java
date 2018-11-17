@@ -62,6 +62,7 @@ public class CadetHardware
     public DcMotor  liftMotor     = null;
     public DigitalChannel digitalChannelUp    = null;
     public DigitalChannel digitalChannelDown   = null;
+    public Servo scoopServo;
 
     public static final double MID_SERVO       =  0.5 ;
     public static final double ARM_UP_POWER    =  0.45 ;
@@ -88,6 +89,8 @@ public class CadetHardware
         backRightDrive = hwMap.get(DcMotor.class, "BackRightDrive");
 
         liftMotor = hwMap.get(DcMotor.class, "LiftMotor");
+        scoopServo = hwMap.get(Servo.class, "ScoopServo");
+
         digitalChannelUp = hwMap.get(DigitalChannel.class, "DigitalChannelUp");
         digitalChannelDown = hwMap.get(DigitalChannel.class, "DigitalChannelDown");
         digitalChannelUp.setMode(DigitalChannel.Mode.INPUT);
@@ -99,6 +102,7 @@ public class CadetHardware
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
 
         liftMotor.setDirection(DcMotor.Direction.FORWARD);
+
 
 
         // Set all motors to zero power

@@ -114,6 +114,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         waitForStart();
 
         robot.liftMotor.setPower(CadetConstants.LIFT_MOTOR_POWER_DOWN);
+
         while (opModeIsActive()) {
             if (!robot.digitalChannelUp.getState()) {
                 robot.liftMotor.setPower(0);
@@ -126,9 +127,11 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         encoderDrive(SLOW_SPEED, -2, -2, 10.0);
         encoderDrive(TURN_SPEED, -9, 9, 4.0);
-        encoderDrive(DRIVE_SPEED, 32, 32, 10.0);  // S1: Forward 47 Inches with 5 Sec timeout
-//        encoderDrive(TURN_SPEED, 12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-//        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED, 27, 27, 10.0);  // S1: Forward 47 Inches with 5 Sec timeout
+
+        robot.scoopServo.setPosition(0);
+
+
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
