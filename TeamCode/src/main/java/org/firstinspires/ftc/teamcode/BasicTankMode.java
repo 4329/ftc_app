@@ -144,6 +144,8 @@ public class BasicTankMode extends OpMode
 
 
         telemetry.addData("Servo", "Position: " + robot.scoopServo.getPosition());
+
+        telemetry.addData("Pov Drive" , povDrive);
     }
 
     /*
