@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
@@ -79,6 +80,8 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.2;
 
+    private int autoStartDelay = 0;
+
     @Override
     public void runOpMode() {
 
@@ -112,12 +115,17 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
+        sleep(autoStartDelay * 1000);
 
         robot.liftMotor.setPower(CadetConstants.LIFT_MOTOR_POWER_DOWN);
+//        robot.backLeftDrive.setPower(-0.1);
+//        robot.backRightDrive.setPower(0.1);
 
         while (opModeIsActive()) {
             if (!robot.digitalChannelUp.getState()) {
                 robot.liftMotor.setPower(0);
+//                robot.backLeftDrive.setPower(0);
+//                robot.backRightDrive.setPower(0);
                 break;
             }
             idle();
@@ -125,16 +133,42 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        encoderDrive(SLOW_SPEED, -2, -2, 10.0);
-        encoderDrive(TURN_SPEED, -9, 9, 4.0);
-        encoderDrive(DRIVE_SPEED, 27, 27, 10.0);  // S1: Forward 47 Inches with 5 Sec timeout
+        // Disengage from hook ONLY
+//        encoderDrive(SLOW_SPEED, 4, 4, 10.0);
+//
+//        robot.scoopServo.setPosition(0);
 
-        robot.scoopServo.setPosition(0);
+        encoderDrive(DRIVE_SPEED, -12, 12, 10.0);
 
 
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
+    }
+    @Override
+    public synchronized void waitForStart() {
+        while (!isStarted()) {
+            synchronized (this) {
+                try {
+                    if (gamepad1.a){
+                        autoStartDelay = 3;
+                    }
+                    if (gamepad1.b){
+                        autoStartDelay = 5;
+                    }
+                    if (gamepad1.y){
+                        autoStartDelay = 0;
+                    }
+
+                    telemetry.addData("Auto Init", autoStartDelay);
+                    telemetry.update();
+                    this.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+        }
     }
 
     /*
