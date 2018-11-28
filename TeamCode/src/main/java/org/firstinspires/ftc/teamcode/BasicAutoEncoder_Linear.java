@@ -36,6 +36,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+
 /**
  * This file illustrates the concept of driving a path based on encoder counts.
  * It uses the common Pushbot hardware class to define the drive on the robot.
@@ -113,6 +117,16 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                 robot.frontRightDrive.getCurrentPosition());
         telemetry.update();
 
+        //imu gyro calibration
+        while (!isStopRequested() && !robot.imu.isGyroCalibrated())
+        {
+            sleep(50);
+            idle();
+        }
+
+        telemetry.addData("Mode", "Waiting for Start");
+        telemetry.addData("Imu Calib Status", robot.imu.getCalibrationStatus().toString());
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         sleep(autoStartDelay * 1000);
@@ -161,6 +175,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                     }
 
                     telemetry.addData("Auto Init", autoStartDelay);
+                    telemetry.addData("Imu", robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
                     telemetry.update();
                     this.wait();
                 } catch (InterruptedException e) {
