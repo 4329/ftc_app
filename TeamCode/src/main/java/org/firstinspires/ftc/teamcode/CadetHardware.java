@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -62,6 +63,8 @@ public class CadetHardware
     public DcMotor  liftMotor     = null;
     public DigitalChannel digitalChannelUp    = null;
     public DigitalChannel digitalChannelDown   = null;
+    public Servo scoopServo;
+    public BNO055IMU imu;
 
     public static final double MID_SERVO       =  0.5 ;
     public static final double ARM_UP_POWER    =  0.45 ;
@@ -88,6 +91,8 @@ public class CadetHardware
         backRightDrive = hwMap.get(DcMotor.class, "BackRightDrive");
 
         liftMotor = hwMap.get(DcMotor.class, "LiftMotor");
+        scoopServo = hwMap.get(Servo.class, "ScoopServo");
+
         digitalChannelUp = hwMap.get(DigitalChannel.class, "DigitalChannelUp");
         digitalChannelDown = hwMap.get(DigitalChannel.class, "DigitalChannelDown");
         digitalChannelUp.setMode(DigitalChannel.Mode.INPUT);
@@ -99,6 +104,7 @@ public class CadetHardware
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
 
         liftMotor.setDirection(DcMotor.Direction.FORWARD);
+
 
 
         // Set all motors to zero power
@@ -115,6 +121,17 @@ public class CadetHardware
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         liftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        //IMU parameters.
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.mode = BNO055IMU.SensorMode.IMU;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.loggingEnabled = false;
+
+        imu = hwMap.get(BNO055IMU.class, "imu");
+
+        imu.initialize(parameters);
     }
  }
 

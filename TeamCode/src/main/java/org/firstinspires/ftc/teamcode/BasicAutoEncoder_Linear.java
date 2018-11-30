@@ -33,7 +33,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 /**
  * This file illustrates the concept of driving a path based on encoder counts.
@@ -77,7 +82,12 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
             (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double SLOW_SPEED = 0.2;
     static final double DRIVE_SPEED = 0.6;
-    static final double TURN_SPEED = 0.2;
+    static final double TURN_SPEED = 0.4;
+    static final double DEPOT = 30;
+    static final double CRATER = 25;
+
+    private int autoStartDelay = 0;
+    private double endRunDistance = CRATER;
 
     @Override
     public void runOpMode() {
@@ -110,13 +120,29 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                 robot.frontRightDrive.getCurrentPosition());
         telemetry.update();
 
+        //imu gyro calibration
+        while (!isStopRequested() && !robot.imu.isGyroCalibrated())
+        {
+            sleep(50);
+            idle();
+        }
+
+        telemetry.addData("Mode", "Waiting for Start");
+        telemetry.addData("Imu Calib Status", robot.imu.getCalibrationStatus().toString());
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
+        sleep(autoStartDelay * 1000);
 
         robot.liftMotor.setPower(CadetConstants.LIFT_MOTOR_POWER_DOWN);
+//        robot.backLeftDrive.setPower(-SLOW_SPEED);
+//        robot.frontLeftDrive.setPower(-SLOW_SPEED);
+
         while (opModeIsActive()) {
             if (!robot.digitalChannelUp.getState()) {
                 robot.liftMotor.setPower(0);
+//                robot.backLeftDrive.setPower(0);
+//                robot.backRightDrive.setPower(0);
                 break;
             }
             idle();
@@ -124,14 +150,76 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        encoderDrive(SLOW_SPEED, -2, -2, 10.0);
-        encoderDrive(TURN_SPEED, -9, 9, 4.0);
-        encoderDrive(DRIVE_SPEED, 32, 32, 10.0);  // S1: Forward 47 Inches with 5 Sec timeout
-//        encoderDrive(TURN_SPEED, 12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-//        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+        // Disengage from hook ONLY
+//        encoderDrive(SLOW_SPEED, 4, 4, 10.0);
+//
+//        robot.scoopServo.setPosition(0);
+
+        encoderDrive(DRIVE_SPEED, -12, 12, 10.0);
+        encoderDrive(SLOW_SPEED, 3, 3, 10.0);
+
+        robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        while (opModeIsActive() &&
+                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 130){
+            robot.frontLeftDrive.setPower(-TURN_SPEED);
+            robot.backLeftDrive.setPower(-TURN_SPEED);
+            robot.frontRightDrive.setPower(TURN_SPEED);
+            robot.backRightDrive.setPower(TURN_SPEED);
+            idle();
+        }
+
+        robot.frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        encoderDrive(DRIVE_SPEED, endRunDistance, endRunDistance, 10.0);
+
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
+    }
+    @Override
+    public synchronized void waitForStart() {
+        while (!isStarted()) {
+            synchronized (this) {
+                try {
+                    if (gamepad1.a){
+                        autoStartDelay = 3;
+                    }
+                    if (gamepad1.b){
+                        autoStartDelay = 5;
+                    }
+                    if (gamepad1.y){
+                        autoStartDelay = 0;
+                    }
+                    if (gamepad1.dpad_up){
+                        endRunDistance = DEPOT;
+                    }
+                    if (gamepad1.dpad_down){
+                        endRunDistance = CRATER;
+                    }
+
+                    telemetry.addData("Auto Init", autoStartDelay);
+                    telemetry.addData("Run Distance", endRunDistance);
+                    telemetry.addData("Imu", robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
+                    telemetry.update();
+                    this.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+        }
     }
 
     /*
