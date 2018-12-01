@@ -158,13 +158,17 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         encoderDrive(DRIVE_SPEED, -12, 12, 10.0);
         encoderDrive(SLOW_SPEED, 3, 3, 10.0);
 
+        // Open scoop to push element into depot/get out of crater wall way
+        robot.scoopServo.setPosition(0);
+
+
         robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         while (opModeIsActive() &&
-                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 130){
+                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 140){
             robot.frontLeftDrive.setPower(-TURN_SPEED);
             robot.backLeftDrive.setPower(-TURN_SPEED);
             robot.frontRightDrive.setPower(TURN_SPEED);
@@ -209,8 +213,8 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                         endRunDistance = CRATER;
                     }
 
-                    telemetry.addData("Auto Init", autoStartDelay);
-                    telemetry.addData("Run Distance", endRunDistance);
+                    telemetry.addData("Start Delay", autoStartDelay);
+                    telemetry.addData("End Run Select", endRunDistance);
                     telemetry.addData("Imu", robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
                     telemetry.update();
                     this.wait();

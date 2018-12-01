@@ -132,7 +132,7 @@ public class BasicTankMode extends OpMode
             robot.scoopServo.setPosition(0);
         }
         if (gamepad2.dpad_left) { //Close Scoop
-            robot.scoopServo.setPosition(0.5);
+            robot.scoopServo.setPosition(0.6);
         }
         if (gamepad2.dpad_down) { //Under Scoop
             robot.scoopServo.setPosition(0.75);
