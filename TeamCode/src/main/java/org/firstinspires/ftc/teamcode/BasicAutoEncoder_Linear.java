@@ -83,11 +83,11 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
     static final double SLOW_SPEED = 0.2;
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.4;
-    static final double DEPOT = 30;
+    static final double DEPOT = 38;
     static final double CRATER = 25;
 
     private int autoStartDelay = 0;
-    private double endRunDistance = CRATER;
+    private boolean isDepot = true;
 
     @Override
     public void runOpMode() {
@@ -186,12 +186,27 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        encoderDrive(DRIVE_SPEED, endRunDistance, endRunDistance, 10.0);
+        if (isDepot){
+            doDepot();
+        }
+        else {
+            encoderDrive(DRIVE_SPEED, CRATER, CRATER, 10.0);
+        }
+
 
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
     }
+
+    private void doDepot() {
+        encoderDrive(DRIVE_SPEED, DEPOT, DEPOT, 10.0);
+        encoderDrive(TURN_SPEED, 5, -5, 10.0);
+        robot.markerServo.setPosition(1);
+        sleep(500);
+        encoderDrive(DRIVE_SPEED, -54, -54, 10.0);
+    }
+
     @Override
     public synchronized void waitForStart() {
         while (!isStarted()) {
@@ -207,14 +222,14 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                         autoStartDelay = 0;
                     }
                     if (gamepad1.dpad_up){
-                        endRunDistance = DEPOT;
+                        isDepot = true;
                     }
                     if (gamepad1.dpad_down){
-                        endRunDistance = CRATER;
+                        isDepot = false;
                     }
 
                     telemetry.addData("Start Delay", autoStartDelay);
-                    telemetry.addData("End Run Select", endRunDistance);
+                    telemetry.addData("isDepot", isDepot);
                     telemetry.addData("Imu", robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
                     telemetry.update();
                     this.wait();
