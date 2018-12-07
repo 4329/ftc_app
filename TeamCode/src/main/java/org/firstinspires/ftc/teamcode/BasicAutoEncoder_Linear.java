@@ -83,7 +83,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
     static final double SLOW_SPEED = 0.2;
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.4;
-    static final double DEPOT = 38;
+    static final double DEPOT = 42;
     static final double CRATER = 25;
 
     private int autoStartDelay = 0;
