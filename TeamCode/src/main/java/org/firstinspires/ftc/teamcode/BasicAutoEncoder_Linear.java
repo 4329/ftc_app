@@ -83,7 +83,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
     static final double SLOW_SPEED = 0.2;
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.4;
-    static final double DEPOT = 42;
+    static final double DEPOT = 40;
     static final double CRATER = 25;
 
     private int autoStartDelay = 0;
@@ -167,8 +167,9 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        //imu 137 - Alpha, 143 - Bravo
         while (opModeIsActive() &&
-                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 140){
+                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 137){
             robot.frontLeftDrive.setPower(-TURN_SPEED);
             robot.backLeftDrive.setPower(-TURN_SPEED);
             robot.frontRightDrive.setPower(TURN_SPEED);
@@ -204,7 +205,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         encoderDrive(TURN_SPEED, 5, -5, 10.0);
         robot.markerServo.setPosition(1);
         sleep(500);
-        encoderDrive(DRIVE_SPEED, -54, -54, 10.0);
+        encoderDrive(DRIVE_SPEED, -20, -20, 10.0);
     }
 
     @Override
