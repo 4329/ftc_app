@@ -65,6 +65,7 @@ public class CadetHardware
     public DigitalChannel digitalChannelDown   = null;
     public Servo scoopServo;
     public Servo markerServo;
+    public Servo liftServo;
     public BNO055IMU imu;
 
     public static final double MID_SERVO       =  0.5 ;
@@ -94,6 +95,7 @@ public class CadetHardware
         liftMotor = hwMap.get(DcMotor.class, "LiftMotor");
         scoopServo = hwMap.get(Servo.class, "ScoopServo");
         markerServo = hwMap.get(Servo.class, "MarkerServo");
+        liftServo = hwMap.get (Servo.class, "LiftServo");
 
         digitalChannelUp = hwMap.get(DigitalChannel.class, "DigitalChannelUp");
         digitalChannelDown = hwMap.get(DigitalChannel.class, "DigitalChannelDown");

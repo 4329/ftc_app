@@ -142,6 +142,13 @@ public class BasicTankMode extends OpMode
             robot.markerServo.setPosition(1);
         }
 
+        if (gamepad2.a){
+            robot.liftServo.setPosition(0.58);
+        }
+        if (gamepad2.b){
+            robot.liftServo.setPosition(0.45);
+        }
+
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
