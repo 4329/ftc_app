@@ -36,9 +36,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+
+import java.util.List;
 
 /**
  * This file illustrates the concept of driving a path based on encoder counts.
@@ -75,6 +81,16 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
     CadetHardware robot = new CadetHardware();   // Use a Pushbot's hardware
     private ElapsedTime runtime = new ElapsedTime();
 
+    private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
+    private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
+    private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
+    private static final String VUFORIA_KEY = "AYdWLp7/////AAABmfV9D1yBc0pOi1LU+BKWlvVworZmGrQJO7RDfUf/fzFdCPB5pPyZHvbcCizQa/wciSGPG+pAY3E6yXq/aXQD7yIlsSWo8CYs5QlH7sGfzfmy//rdtToFlMmUxP7Mf/obD/90x9CODqEeOYgZJfsrO1B5GYKbMpwsxmsuMBkFkDCjvTyNhavldYXXayHvobP/cS6x91EGVDzaKEFhJWEL4vJR2XvUhBSQdDORu/AGlE/vSu098NUW/3kvUANyvOLMhbMdpM7zTJXcakgHVy8CLrJ2R1ZSi34efaI5plCrwAUL6E2Og0Qqk5cjNckfksFp0cQb6RU0HnDpwdYf3lt9tHNicvb+w3KPL9GXV1vibbF8";
+    private VuforiaLocalizer vuforia;
+    private TFObjectDetector tfod;
+    private int detectedGoldMineralX = -1;
+    private String detectedGoldPosition = null;
+    private double detectedGoldAngle;
+
     static final double COUNTS_PER_MOTOR_REV = 1120;    // eg: NeveRest Motor Encoder
     static final double DRIVE_GEAR_REDUCTION = 1.286;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_INCHES = 4;     // For figuring circumference
@@ -102,15 +118,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         telemetry.addData("Status", "Resetting Encoders");    //
         telemetry.update();
 
-        robot.frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        encoderMode();
 
         // Send telemetry message to indicate successful Encoder reset
         telemetry.addData("Path0", "Starting at %7d :%7d",
@@ -147,16 +155,10 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
             }
             idle();
         }
+        robot.liftServo.setPosition(0.58);
 
-        // Step through each leg of the path,
-        // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        // Disengage from hook ONLY
-//        encoderDrive(SLOW_SPEED, 4, 4, 10.0);
-//
-//        robot.scoopServo.setPosition(0);
-
-        encoderDrive(DRIVE_SPEED, -12, 12, 10.0);
-        encoderDrive(SLOW_SPEED, 3, 3, 10.0);
+//        encoderDrive(DRIVE_SPEED, -12, 12, 10.0);
+//        encoderDrive(SLOW_SPEED, 3, 3, 10.0);
 
         // Open scoop to push element into depot/get out of crater wall way
         robot.scoopServo.setPosition(0);
@@ -168,24 +170,18 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         robot.backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //imu 137 - Alpha, 143 - Bravo
-        while (opModeIsActive() &&
-                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 137){
-            robot.frontLeftDrive.setPower(-TURN_SPEED);
-            robot.backLeftDrive.setPower(-TURN_SPEED);
-            robot.frontRightDrive.setPower(TURN_SPEED);
-            robot.backRightDrive.setPower(TURN_SPEED);
-            idle();
-        }
+//        while (opModeIsActive() &&
+//                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 137){
+//            robot.frontLeftDrive.setPower(-TURN_SPEED);
+//            robot.backLeftDrive.setPower(-TURN_SPEED);
+//            robot.frontRightDrive.setPower(TURN_SPEED);
+//            robot.backRightDrive.setPower(TURN_SPEED);
+//            idle();
+//        }
 
-        robot.frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        detectAndTurn();
 
-        robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        encoderMode();
 
         if (isDepot){
             doDepot();
@@ -198,6 +194,93 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
+    }
+
+    private void detectAndTurn() {
+        initVuforia();
+
+        if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
+            initTfod();
+        } else {
+            telemetry.addData("Sorry!", "This device is not compatible with TFOD");
+        }
+
+        if (opModeIsActive()) {
+            /** Activate Tensor Flow Object Detection. */
+            if (tfod != null) {
+                tfod.activate();
+            }
+
+            while (opModeIsActive()) {
+                if (tfod != null) {
+                    // getUpdatedRecognitions() will return null if no new information is available since
+                    // the last time that call was made.
+                    List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                    if (updatedRecognitions != null) {
+                        telemetry.addData("# Object Detected", updatedRecognitions.size());
+                        if (updatedRecognitions.size() == 3) {
+                            int goldMineralX = -1;
+                            int silverMineral1X = -1;
+                            int silverMineral2X = -1;
+                            for (Recognition recognition : updatedRecognitions) {
+                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+
+                                    detectedGoldAngle = recognition.estimateAngleToObject(AngleUnit.DEGREES);
+
+                                    goldMineralX = (int) recognition.getLeft();
+                                } else if (silverMineral1X == -1) {
+                                    silverMineral1X = (int) recognition.getLeft();
+                                } else {
+                                    silverMineral2X = (int) recognition.getLeft();
+                                }
+                                telemetry.addData("EstimateAngle", recognition.estimateAngleToObject(AngleUnit.DEGREES));
+                                telemetry.addData("goldMineralX", goldMineralX);
+                            }
+                            if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
+                                if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
+                                    detectedGoldPosition = "Left";
+                                } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
+                                    detectedGoldPosition = "Right";
+                                } else {
+                                    detectedGoldPosition = "Center";
+                                }
+
+                                telemetry.addData("Gold Mineral Position", detectedGoldPosition);
+                                detectedGoldMineralX = goldMineralX;
+                                telemetry.update();
+                                break;
+
+                            }
+                        }
+                        telemetry.update();
+                    }
+                }
+            }
+            encoderMode();
+            if ( detectedGoldPosition.equals("Right")){
+                encoderDrive(TURN_SPEED, -5, 5, 10.0);
+            }
+            if ( detectedGoldPosition.equals("Left")){
+                encoderDrive(TURN_SPEED, 5, -5, 10.0);
+            }
+
+        }
+
+        if (tfod != null) {
+            tfod.shutdown();
+        }
+    }
+
+    private void encoderMode() {
+        robot.frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.backRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     private void doDepot() {
@@ -315,4 +398,31 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
             //  sleep(250);   // optional pause after each move
         }
     }
+
+    private void initVuforia() {
+        /*
+         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+         */
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+
+        //  Instantiate the Vuforia engine
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+        // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
+    }
+
+    /**
+     * Initialize the Tensor Flow Object Detection engine.
+     */
+    private void initTfod() {
+        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+    }
+
 }
