@@ -99,8 +99,8 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
     static final double SLOW_SPEED = 0.2;
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.4;
-    static final double DEPOT = 40;
-    static final double CRATER = 25;
+    static final double DEPOT = -40;
+    static final double CRATER = -25;
 
     private int autoStartDelay = 0;
     private boolean isDepot = true;
@@ -162,6 +162,10 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 
         // Open scoop to push element into depot/get out of crater wall way
         robot.scoopServo.setPosition(0);
+
+        sleep(1000);
+
+        encoderDrive(DRIVE_SPEED, -2, -2, 10.0);
 
 
         robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -258,10 +262,10 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
             }
             encoderMode();
             if ( detectedGoldPosition.equals("Right")){
-                encoderDrive(TURN_SPEED, -5, 5, 10.0);
+                encoderDrive(TURN_SPEED, 3, -3, 10.0);
             }
             if ( detectedGoldPosition.equals("Left")){
-                encoderDrive(TURN_SPEED, 5, -5, 10.0);
+                encoderDrive(TURN_SPEED, -3, 3, 10.0);
             }
 
         }
