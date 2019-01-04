@@ -30,10 +30,8 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -99,7 +97,6 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
     static final double SLOW_SPEED = 0.2;
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.4;
-    static final double DEPOT = -38;
     static final double CRATER = -25;
 
     private int autoStartDelay = 0;
@@ -165,16 +162,17 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 
         sleep(1000);
 
-        detectAndTurn();
+        detectGold();
 
+        //Drive back to turn
         encoderDrive(DRIVE_SPEED, -2, -2, 10.0);
 
         turnToGold();
 
-        robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        robot.backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //imu 137 - Alpha, 143 - Bravo
 //        while (opModeIsActive() &&
@@ -190,7 +188,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         encoderMode();
 
         if (isDepot){
-            doDepot();
+            knockOffGold();
         }
         else {
             encoderDrive(DRIVE_SPEED, CRATER, CRATER, 10.0);
@@ -202,7 +200,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         telemetry.update();
     }
 
-    private void detectAndTurn() {
+    private void detectGold() {
         initVuforia();
 
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
@@ -280,6 +278,29 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         }
     }
 
+    private void knockOffGold() {
+        encoderMode();
+        if ( detectedGoldPosition.equals("Center")){
+            encoderDrive(DRIVE_SPEED, -38, -38, 10.0);
+            robot.markerServo.setPosition(1);
+            encoderDrive(TURN_SPEED, 5, -5, 10.0);
+            sleep(500);
+            encoderDrive(DRIVE_SPEED, 35, 35, 10.0);
+            encoderDrive(DRIVE_SPEED, -1, 1, 10.0);
+            encoderDrive(DRIVE_SPEED, 16, 16, 10.0);
+        }
+        if (detectedGoldPosition.equals("Right")){
+            encoderDrive(TURN_SPEED, 3, -3, 10.0);
+            encoderDrive(DRIVE_SPEED, -30, -30, 10.0);
+            robot.markerServo.setPosition(1);
+        }
+        if (detectedGoldPosition.equals("Left")){
+            encoderDrive(TURN_SPEED, -3, 3, 10.0);
+            encoderDrive(DRIVE_SPEED, -30, -30, 10.0);
+            robot.markerServo.setPosition(1);
+        }
+    }
+
     private void encoderMode() {
         robot.frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -292,15 +313,15 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         robot.backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    private void doDepot() {
-        encoderDrive(DRIVE_SPEED, DEPOT, DEPOT, 10.0);
-        robot.markerServo.setPosition(1);
-        encoderDrive(TURN_SPEED, 5, -5, 10.0);
-        sleep(500);
-        encoderDrive(DRIVE_SPEED, 35, 35, 10.0);
-        encoderDrive(DRIVE_SPEED, -1, 1, 10.0);
-        encoderDrive(DRIVE_SPEED, 16, 16, 10.0);
-    }
+//    private void doDepot() {
+//        encoderDrive(DRIVE_SPEED, DEPOT, DEPOT, 10.0);
+//        robot.markerServo.setPosition(1);
+//        encoderDrive(TURN_SPEED, 5, -5, 10.0);
+//        sleep(500);
+//        encoderDrive(DRIVE_SPEED, 35, 35, 10.0);
+//        encoderDrive(DRIVE_SPEED, -1, 1, 10.0);
+//        encoderDrive(DRIVE_SPEED, 16, 16, 10.0);
+//    }
 
     @Override
     public synchronized void waitForStart() {
