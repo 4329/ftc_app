@@ -99,7 +99,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
     static final double SLOW_SPEED = 0.2;
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.4;
-    static final double DEPOT = -40;
+    static final double DEPOT = -38;
     static final double CRATER = -25;
 
     private int autoStartDelay = 0;
@@ -165,8 +165,11 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 
         sleep(1000);
 
+        detectAndTurn();
+
         encoderDrive(DRIVE_SPEED, -2, -2, 10.0);
 
+        turnToGold();
 
         robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -183,7 +186,6 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 //            idle();
 //        }
 
-        detectAndTurn();
 
         encoderMode();
 
@@ -260,18 +262,21 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                     }
                 }
             }
-            encoderMode();
-            if ( detectedGoldPosition.equals("Right")){
-                encoderDrive(TURN_SPEED, 3, -3, 10.0);
-            }
-            if ( detectedGoldPosition.equals("Left")){
-                encoderDrive(TURN_SPEED, -3, 3, 10.0);
-            }
 
         }
 
         if (tfod != null) {
             tfod.shutdown();
+        }
+    }
+
+    private void turnToGold() {
+        encoderMode();
+        if ( detectedGoldPosition.equals("Right")){
+            encoderDrive(TURN_SPEED, 3, -3, 10.0);
+        }
+        if ( detectedGoldPosition.equals("Left")){
+            encoderDrive(TURN_SPEED, -3, 3, 10.0);
         }
     }
 
@@ -289,10 +294,12 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 
     private void doDepot() {
         encoderDrive(DRIVE_SPEED, DEPOT, DEPOT, 10.0);
-        encoderDrive(TURN_SPEED, 5, -5, 10.0);
         robot.markerServo.setPosition(1);
+        encoderDrive(TURN_SPEED, 5, -5, 10.0);
         sleep(500);
-        encoderDrive(DRIVE_SPEED, -20, -20, 10.0);
+        encoderDrive(DRIVE_SPEED, 35, 35, 10.0);
+        encoderDrive(DRIVE_SPEED, -1, 1, 10.0);
+        encoderDrive(DRIVE_SPEED, 16, 16, 10.0);
     }
 
     @Override
