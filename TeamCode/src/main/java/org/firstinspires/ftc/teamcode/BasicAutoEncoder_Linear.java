@@ -167,7 +167,6 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         //Drive back to turn
         encoderDrive(DRIVE_SPEED, -2, -2, 10.0);
 
-        turnToGold();
 
 //        robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 //        robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -185,13 +184,13 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 //        }
 
 
-        encoderMode();
+        knockOffGold();
 
         if (isDepot){
-            knockOffGold();
+            doDepot();
         }
         else {
-            encoderDrive(DRIVE_SPEED, CRATER, CRATER, 10.0);
+            doCrater();
         }
 
 
@@ -199,6 +198,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         telemetry.addData("Path", "Complete");
         telemetry.update();
     }
+
 
     private void detectGold() {
         initVuforia();
@@ -268,17 +268,67 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         }
     }
 
-    private void turnToGold() {
+
+    private void knockOffGold() {
         encoderMode();
-        if ( detectedGoldPosition.equals("Right")){
-            encoderDrive(TURN_SPEED, 3, -3, 10.0);
+        if ( detectedGoldPosition.equals("Center")){
+            encoderDrive(DRIVE_SPEED, -12, -12, 10.0);
         }
-        if ( detectedGoldPosition.equals("Left")){
+        if (detectedGoldPosition.equals("Right")){
+            encoderDrive(TURN_SPEED, 3, -3, 10.0);
+            encoderDrive(DRIVE_SPEED, -22, -22, 10.0);
+        }
+        if (detectedGoldPosition.equals("Left")){
             encoderDrive(TURN_SPEED, -3, 3, 10.0);
+            encoderDrive(DRIVE_SPEED, -22, -22, 10.0);
         }
     }
 
-    private void knockOffGold() {
+    private void doDepot() {
+        encoderMode();
+        if ( detectedGoldPosition.equals("Center")){
+            encoderDrive(DRIVE_SPEED, -26, -26, 10.0);
+            sleep(1000);
+            robot.markerServo.setPosition(1);
+            sleep(1000);
+            encoderDrive(TURN_SPEED, 5, -5, 10.0);
+            sleep(500);
+            encoderDrive(DRIVE_SPEED, 35, 35, 10.0);
+            encoderDrive(DRIVE_SPEED, -1, 1, 10.0);
+            encoderDrive(DRIVE_SPEED, 16, 16, 10.0);
+        }
+        if (detectedGoldPosition.equals("Right")){
+            encoderDrive(DRIVE_SPEED, -7, -7, 10.0);
+            encoderDrive(DRIVE_SPEED, -7, 7, 10.0);
+            encoderDrive(DRIVE_SPEED, -15, -15, 10.0);
+            sleep(1000);
+            robot.markerServo.setPosition(1);
+            sleep(1000);
+            encoderDrive(DRIVE_SPEED, 47, 47, 10.0);
+        }
+        if (detectedGoldPosition.equals("Left")){
+            encoderDrive(DRIVE_SPEED, -7, -7, 10.0);
+            encoderDrive(DRIVE_SPEED, 7, -7, 10.0);
+            encoderDrive(DRIVE_SPEED, -15, -15, 10.0);
+            sleep(1000);
+            robot.markerServo.setPosition(1);
+            sleep(1000);
+            encoderDrive(DRIVE_SPEED, 47, 47, 10.0);
+        }
+    }
+
+    private void doCrater() {
+        encoderMode();
+        if ( detectedGoldPosition.equals("Center")){
+            encoderDrive(DRIVE_SPEED, -14, -14, 10.0);
+        }
+        if (detectedGoldPosition.equals("Right")){
+        }
+        if (detectedGoldPosition.equals("Left")){
+        }
+    }
+
+    private void knockOffGoldOld() {
         encoderMode();
         if ( detectedGoldPosition.equals("Center")){
             encoderDrive(DRIVE_SPEED, -38, -38, 10.0);
