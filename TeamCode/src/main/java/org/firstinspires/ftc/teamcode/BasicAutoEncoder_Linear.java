@@ -98,6 +98,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.4;
     static final double CRATER = -25;
+    static long DETECT_GOLD_DELAY = 3000;
 
     private int autoStartDelay = 0;
     private boolean isDepot = true;
@@ -215,6 +216,8 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                 tfod.activate();
             }
 
+            long now = System.currentTimeMillis();
+
             while (opModeIsActive()) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
@@ -222,6 +225,10 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
                         telemetry.addData("# Object Detected", updatedRecognitions.size());
+                        if (System.currentTimeMillis() > now + DETECT_GOLD_DELAY){
+                            detectedGoldPosition = "Center";
+                            break;
+                        }
                         if (updatedRecognitions.size() == 3) {
                             int goldMineralX = -1;
                             int silverMineral1X = -1;
@@ -288,11 +295,10 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         encoderMode();
         if ( detectedGoldPosition.equals("Center")){
             encoderDrive(DRIVE_SPEED, -26, -26, 10.0);
-            sleep(1000);
-            robot.markerServo.setPosition(1);
-            sleep(1000);
-            encoderDrive(TURN_SPEED, 5, -5, 10.0);
             sleep(500);
+            robot.markerServo.setPosition(-1);
+            sleep(500);
+            encoderDrive(TURN_SPEED, 5, -5, 10.0);
             encoderDrive(DRIVE_SPEED, 35, 35, 10.0);
             encoderDrive(DRIVE_SPEED, -1, 1, 10.0);
             encoderDrive(DRIVE_SPEED, 16, 16, 10.0);
@@ -301,19 +307,23 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
             encoderDrive(DRIVE_SPEED, -7, -7, 10.0);
             encoderDrive(DRIVE_SPEED, -7, 7, 10.0);
             encoderDrive(DRIVE_SPEED, -15, -15, 10.0);
-            sleep(1000);
-            robot.markerServo.setPosition(1);
-            sleep(1000);
-            encoderDrive(DRIVE_SPEED, 47, 47, 10.0);
+            sleep(500);
+            robot.markerServo.setPosition(-1);
+            sleep(500);
+            encoderDrive(DRIVE_SPEED, 35, 35, 10.0);
+            encoderDrive(DRIVE_SPEED, -1, 1, 10.0);
+            encoderDrive(DRIVE_SPEED, 12, 12, 10.0);
         }
         if (detectedGoldPosition.equals("Left")){
             encoderDrive(DRIVE_SPEED, -7, -7, 10.0);
             encoderDrive(DRIVE_SPEED, 7, -7, 10.0);
             encoderDrive(DRIVE_SPEED, -15, -15, 10.0);
-            sleep(1000);
-            robot.markerServo.setPosition(1);
-            sleep(1000);
-            encoderDrive(DRIVE_SPEED, 47, 47, 10.0);
+            sleep(500);
+            robot.markerServo.setPosition(-1);
+            sleep(500);
+            encoderDrive(DRIVE_SPEED, 35, 35, 10.0);
+            encoderDrive(DRIVE_SPEED, -1, 1, 10.0);
+            encoderDrive(DRIVE_SPEED, 12, 12, 10.0);
         }
     }
 
@@ -323,33 +333,13 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
             encoderDrive(DRIVE_SPEED, -14, -14, 10.0);
         }
         if (detectedGoldPosition.equals("Right")){
+            encoderDrive(DRIVE_SPEED, -18, -18, 10.0);
         }
         if (detectedGoldPosition.equals("Left")){
+            encoderDrive(DRIVE_SPEED, -18, -18, 10.0);
         }
     }
 
-    private void knockOffGoldOld() {
-        encoderMode();
-        if ( detectedGoldPosition.equals("Center")){
-            encoderDrive(DRIVE_SPEED, -38, -38, 10.0);
-            robot.markerServo.setPosition(1);
-            encoderDrive(TURN_SPEED, 5, -5, 10.0);
-            sleep(500);
-            encoderDrive(DRIVE_SPEED, 35, 35, 10.0);
-            encoderDrive(DRIVE_SPEED, -1, 1, 10.0);
-            encoderDrive(DRIVE_SPEED, 16, 16, 10.0);
-        }
-        if (detectedGoldPosition.equals("Right")){
-            encoderDrive(TURN_SPEED, 3, -3, 10.0);
-            encoderDrive(DRIVE_SPEED, -30, -30, 10.0);
-            robot.markerServo.setPosition(1);
-        }
-        if (detectedGoldPosition.equals("Left")){
-            encoderDrive(TURN_SPEED, -3, 3, 10.0);
-            encoderDrive(DRIVE_SPEED, -30, -30, 10.0);
-            robot.markerServo.setPosition(1);
-        }
-    }
 
     private void encoderMode() {
         robot.frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -394,8 +384,8 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                         isDepot = false;
                     }
 
-                    telemetry.addData("Start Delay", autoStartDelay);
-                    telemetry.addData("isDepot", isDepot);
+                    telemetry.addData("Start Delay", autoStartDelay + " Y = 0, A = 3, B = 5");
+                    telemetry.addData("isDepot", isDepot + " Dpad Up = Depot, Dpad Down = Crater");
                     telemetry.addData("Imu", robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
                     telemetry.update();
                     this.wait();

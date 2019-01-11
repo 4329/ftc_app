@@ -55,7 +55,7 @@ public class BasicTankMode extends OpMode
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private CadetHardware robot = new CadetHardware();
-    private boolean povDrive = true;
+    private boolean povDrive = false;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -119,6 +119,10 @@ public class BasicTankMode extends OpMode
             rightPower = -gamepad1.right_stick_y ;
         }
 
+        if (gamepad1.right_bumper){
+            leftPower = leftPower*leftPower;
+            rightPower = rightPower*rightPower;
+        }
 
         // Send calculated power to wheels
         robot.frontLeftDrive.setPower(leftPower);
@@ -139,7 +143,7 @@ public class BasicTankMode extends OpMode
         }
 
         if (gamepad2.left_bumper){
-            robot.markerServo.setPosition(1);
+            robot.markerServo.setPosition(-1);
         }
 
         if (gamepad2.a){
