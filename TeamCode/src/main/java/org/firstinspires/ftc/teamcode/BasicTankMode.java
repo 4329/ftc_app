@@ -120,8 +120,8 @@ public class BasicTankMode extends OpMode
         }
 
         if (gamepad1.right_bumper){
-            leftPower = leftPower*leftPower;
-            rightPower = rightPower*rightPower;
+            leftPower = leftPower*0.35;
+            rightPower = rightPower*0.35;
         }
 
         // Send calculated power to wheels

@@ -311,7 +311,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
             robot.markerServo.setPosition(-1);
             sleep(500);
             encoderDrive(DRIVE_SPEED, 35, 35, 10.0);
-            encoderDrive(DRIVE_SPEED, -1, 1, 10.0);
+            encoderDrive(DRIVE_SPEED, -1.5, 1.5, 10.0);
             encoderDrive(DRIVE_SPEED, 12, 12, 10.0);
         }
         if (detectedGoldPosition.equals("Left")){
@@ -322,7 +322,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
             robot.markerServo.setPosition(-1);
             sleep(500);
             encoderDrive(DRIVE_SPEED, 35, 35, 10.0);
-            encoderDrive(DRIVE_SPEED, -1, 1, 10.0);
+            encoderDrive(DRIVE_SPEED, -1.5, 1.5, 10.0);
             encoderDrive(DRIVE_SPEED, 12, 12, 10.0);
         }
     }
