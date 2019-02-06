@@ -141,8 +141,11 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         waitForStart();
         sleep(autoStartDelay * 1000);
 
+
         detectGoldInit();
-        detectGold();
+        telemetry.addData("Robot Position: ", "High");
+        //detectGold();
+        telemetry.update();
 
 
         robot.liftMotor.setPower(CadetConstants.LIFT_MOTOR_POWER_DOWN);
@@ -169,7 +172,9 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         sleep(1000);
 
         if (detectedGoldPosition == null){
+            telemetry.addData("Robot Position: ", "Ground");
             detectGold();
+            telemetry.update();
             if (detectedGoldPosition == null){
                 detectedGoldPosition = "Center";
             }
@@ -230,9 +235,9 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                     // the last time that call was made.
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
-                        telemetry.addData("# Object Detected", updatedRecognitions.size());
                         if (System.currentTimeMillis() > now + DETECT_GOLD_DELAY){
                             detectedGoldPosition = null;
+                            telemetry.addData("Timeout",System.currentTimeMillis());
                             break;
                         }
                         if (updatedRecognitions.size() == 2) {
@@ -241,19 +246,26 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                             //Not in use, keeping to stay consistent with sample
                             int silverMineral2X = -1;
                             for (Recognition recognition : updatedRecognitions) {
-                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL) && (recognition.getConfidence()> 0.7)) {
 
                                     detectedGoldAngle = recognition.estimateAngleToObject(AngleUnit.DEGREES);
+                                    telemetry.addData("goldConfidence", recognition.getConfidence());
 
                                     goldMineralX = (int) recognition.getLeft();
+                                    telemetry.addData("goldBottom", recognition.getBottom());
                                 } else if (silverMineral1X == -1) {
                                     silverMineral1X = (int) recognition.getLeft();
+                                    telemetry.addData("silver1Bottom", recognition.getBottom());
                                 } else {
                                     silverMineral2X = (int) recognition.getLeft();
+                                    telemetry.addData("silver2Bottom", recognition.getBottom());
                                 }
-                                telemetry.addData("EstimateAngle", recognition.estimateAngleToObject(AngleUnit.DEGREES));
-                                telemetry.addData("goldMineralX", goldMineralX);
                             }
+                            telemetry.addData("# Object Detected", updatedRecognitions.size());
+                            telemetry.addData("goldMineralX", goldMineralX);
+                            telemetry.addData("silverMineral1X", silverMineral1X);
+                            telemetry.addData("silverMineral2X", silverMineral2X);
+
                             if (goldMineralX != -1) {
                                 if (goldMineralX < silverMineral1X) {
                                     detectedGoldPosition = "Center";
@@ -261,17 +273,15 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                                     detectedGoldPosition = "Right";
                                 }
 
-                                telemetry.addData("Gold Mineral Position", detectedGoldPosition);
                                 detectedGoldMineralX = goldMineralX;
-                                telemetry.update();
 
                             }
                             else {
                                 detectedGoldPosition = "Left";
                             }
+                            telemetry.addData("Gold Mineral Position", detectedGoldPosition);
                             break;
                         }
-                        telemetry.update();
                     }
                 }
             }
@@ -331,18 +341,18 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
             robot.markerServo.setPosition(-1);
             sleep(500);
             encoderDrive(HIGH_SPEED, 35, 35, 10.0);
-            encoderDrive(DRIVE_SPEED, -1.5, 1.5, 10.0);
+            encoderDrive(DRIVE_SPEED, 1, -1, 10.0);
             encoderDrive(HIGH_SPEED, 12, 12, 10.0);
         }
         if (detectedGoldPosition.equals("Left")){
-            encoderDrive(DRIVE_SPEED, -7, -7, 10.0);
+            encoderDrive(DRIVE_SPEED, -5, -5, 10.0);
             encoderDrive(DRIVE_SPEED, 7, -7, 10.0);
             encoderDrive(DRIVE_SPEED, -15, -15, 10.0);
             sleep(500);
             robot.markerServo.setPosition(-1);
             sleep(500);
             encoderDrive(HIGH_SPEED, 35, 35, 10.0);
-            encoderDrive(DRIVE_SPEED, -1.5, 1.5, 10.0);
+            //encoderDrive(DRIVE_SPEED, -1.5, 1.5, 10.0);
             encoderDrive(HIGH_SPEED, 12, 12, 10.0);
         }
     }
