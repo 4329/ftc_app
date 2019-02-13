@@ -189,8 +189,8 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 //        robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 //        robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 //        robot.backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        //imu 137 - Alpha, 143 - Bravo
+//
+//
 //        while (opModeIsActive() &&
 //                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 137){
 //            robot.frontLeftDrive.setPower(-TURN_SPEED);
@@ -328,9 +328,11 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
             sleep(500);
             robot.markerServo.setPosition(-1);
             sleep(500);
+            //Turn in Depot - Towards Crater
             encoderDrive(TURN_SPEED, 5, -5, 10.0);
-            encoderDrive(HIGH_SPEED, 35, 35, 10.0);
-            encoderDrive(DRIVE_SPEED, -1, 1, 10.0);
+            //Drive into Crater
+            encoderDrive(HIGH_SPEED, 30, 30, 10.0);
+            encoderDrive(DRIVE_SPEED, 1, -1, 10.0);
             encoderDrive(HIGH_SPEED, 16, 16, 10.0);
         }
         if (detectedGoldPosition.equals("Right")){
@@ -340,7 +342,8 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
             sleep(500);
             robot.markerServo.setPosition(-1);
             sleep(500);
-            encoderDrive(HIGH_SPEED, 35, 35, 10.0);
+            //Drive into Crater
+            encoderDrive(HIGH_SPEED, 30, 30, 10.0);
             encoderDrive(DRIVE_SPEED, 1, -1, 10.0);
             encoderDrive(HIGH_SPEED, 12, 12, 10.0);
         }
@@ -351,8 +354,9 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
             sleep(500);
             robot.markerServo.setPosition(-1);
             sleep(500);
-            encoderDrive(HIGH_SPEED, 35, 35, 10.0);
-            //encoderDrive(DRIVE_SPEED, -1.5, 1.5, 10.0);
+            //Drive into Crater
+            encoderDrive(HIGH_SPEED, 30, 30, 10.0);
+            encoderDrive(DRIVE_SPEED, 2, -2, 10.0);
             encoderDrive(HIGH_SPEED, 12, 12, 10.0);
         }
     }
