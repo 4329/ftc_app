@@ -149,25 +149,54 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 
 
         robot.liftMotor.setPower(CadetConstants.LIFT_MOTOR_POWER_DOWN);
-//        robot.backLeftDrive.setPower(-SLOW_SPEED);
-//        robot.frontLeftDrive.setPower(-SLOW_SPEED);
+
 
         while (opModeIsActive()) {
             if (!robot.digitalChannelUp.getState()) {
                 robot.liftMotor.setPower(0);
-//                robot.backLeftDrive.setPower(0);
-//                robot.backRightDrive.setPower(0);
                 break;
             }
             idle();
         }
         robot.liftServo.setPosition(0.58);
 
-//        encoderDrive(DRIVE_SPEED, -12, 12, 10.0);
-//        encoderDrive(SLOW_SPEED, 3, 3, 10.0);
 
-        // Open scoop to push element into depot/get out of crater wall way
+        //Open scoop to push element into depot/get out of crater wall way
         robot.scoopServo.setPosition(0);
+
+        encoderDrive(DRIVE_SPEED, -1, -1, 10.0);
+
+
+        //Turn off encoderMode (driving with encoders) to use imu
+        robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+        //imu to correct after landed
+        while (opModeIsActive() &&
+                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 0){
+            telemetry.addData("imu angle",robot.imu.getPosition());
+            robot.frontLeftDrive.setPower(-SLOW_SPEED);
+            robot.backLeftDrive.setPower(-SLOW_SPEED);
+            robot.frontRightDrive.setPower(SLOW_SPEED);
+            robot.backRightDrive.setPower(SLOW_SPEED);
+            idle();
+        }
+        while (opModeIsActive() &&
+                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle > 0){
+            telemetry.addData("imu angle",robot.imu.getPosition());
+            robot.frontLeftDrive.setPower(SLOW_SPEED);
+            robot.backLeftDrive.setPower(SLOW_SPEED);
+            robot.frontRightDrive.setPower(-SLOW_SPEED);
+            robot.backRightDrive.setPower(-SLOW_SPEED);
+            idle();
+        }
+
+
+        //Turn on encoderMode (driving with encoders) since imu is finished
+        encoderMode();
 
         sleep(1000);
 
@@ -183,22 +212,6 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 
         //Drive back to turn
         encoderDrive(DRIVE_SPEED, -2, -2, 10.0);
-
-
-//        robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        robot.backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//
-//
-//        while (opModeIsActive() &&
-//                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 137){
-//            robot.frontLeftDrive.setPower(-TURN_SPEED);
-//            robot.backLeftDrive.setPower(-TURN_SPEED);
-//            robot.frontRightDrive.setPower(TURN_SPEED);
-//            robot.backRightDrive.setPower(TURN_SPEED);
-//            idle();
-//        }
 
 
         knockOffGold();
@@ -240,13 +253,12 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                             telemetry.addData("Timeout",System.currentTimeMillis());
                             break;
                         }
-                        if (updatedRecognitions.size() == 2) {
+                        if (updatedRecognitions.size() == 3) {
                             int goldMineralX = -1;
                             int silverMineral1X = -1;
-                            //Not in use, keeping to stay consistent with sample
                             int silverMineral2X = -1;
                             for (Recognition recognition : updatedRecognitions) {
-                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL) && (recognition.getConfidence()> 0.7)) {
+                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
 
                                     detectedGoldAngle = recognition.estimateAngleToObject(AngleUnit.DEGREES);
                                     telemetry.addData("goldConfidence", recognition.getConfidence());
@@ -266,20 +278,18 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                             telemetry.addData("silverMineral1X", silverMineral1X);
                             telemetry.addData("silverMineral2X", silverMineral2X);
 
-                            if (goldMineralX != -1) {
-                                if (goldMineralX < silverMineral1X) {
-                                    detectedGoldPosition = "Center";
-                                } else {
+                            if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
+                                if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
+                                    detectedGoldPosition = "Left";
+                                } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X){
                                     detectedGoldPosition = "Right";
+                                } else {
+                                    detectedGoldPosition = "Center";
                                 }
-
-                                detectedGoldMineralX = goldMineralX;
-
-                            }
-                            else {
-                                detectedGoldPosition = "Left";
                             }
                             telemetry.addData("Gold Mineral Position", detectedGoldPosition);
+                            detectedGoldMineralX = goldMineralX;
+                            telemetry.update();
                             break;
                         }
                     }
