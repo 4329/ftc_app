@@ -94,7 +94,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
     static final double WHEEL_DIAMETER_INCHES = 4;     // For figuring circumference
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double SLOW_SPEED = 0.2;
+    static final double SLOW_SPEED = 0.3;
     static final double HIGH_SPEED = 0.8;
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.4;
@@ -163,8 +163,9 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 
         //Open scoop to push element into depot/get out of crater wall way
         robot.scoopServo.setPosition(0);
+        sleep(1500);
 
-        encoderDrive(DRIVE_SPEED, -1, -1, 10.0);
+        encoderDrive(1.0, -3.0, -3.0, 10.0);
 
 
         //Turn off encoderMode (driving with encoders) to use imu
@@ -175,25 +176,46 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 
 
         //imu to correct after landed
+        telemetry.addData("Robot Turning", "Unknown");
+        telemetry.addData("imu angle_other",robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
+        telemetry.update();
         while (opModeIsActive() &&
-                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 0){
+                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 0.0){
+            telemetry.addData("Robot Turning", "Left");
             telemetry.addData("imu angle",robot.imu.getPosition());
+            telemetry.addData("imu angle_other",robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
             robot.frontLeftDrive.setPower(-SLOW_SPEED);
             robot.backLeftDrive.setPower(-SLOW_SPEED);
             robot.frontRightDrive.setPower(SLOW_SPEED);
             robot.backRightDrive.setPower(SLOW_SPEED);
+            telemetry.update();
             idle();
         }
+        robot.frontLeftDrive.setPower(0);
+        robot.backLeftDrive.setPower(0);
+        robot.frontRightDrive.setPower(0);
+        robot.backRightDrive.setPower(0);
+
         while (opModeIsActive() &&
-                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle > 0){
+                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle > 0.0){
+            telemetry.addData("Robot Turning", "Right");
             telemetry.addData("imu angle",robot.imu.getPosition());
+            telemetry.addData("imu angle_other",robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
             robot.frontLeftDrive.setPower(SLOW_SPEED);
             robot.backLeftDrive.setPower(SLOW_SPEED);
             robot.frontRightDrive.setPower(-SLOW_SPEED);
             robot.backRightDrive.setPower(-SLOW_SPEED);
+            telemetry.update();
             idle();
         }
 
+        robot.frontLeftDrive.setPower(0);
+        robot.backLeftDrive.setPower(0);
+        robot.frontRightDrive.setPower(0);
+        robot.backRightDrive.setPower(0);
+
+        telemetry.addData("Robot Turning", "Done");
+        telemetry.update();
 
         //Turn on encoderMode (driving with encoders) since imu is finished
         encoderMode();
