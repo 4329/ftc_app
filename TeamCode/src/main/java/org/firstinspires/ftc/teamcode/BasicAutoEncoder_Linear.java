@@ -165,57 +165,20 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         robot.scoopServo.setPosition(0);
         sleep(1500);
 
-        encoderDrive(1.0, -3.0, -3.0, 10.0);
-
-
-        //Turn off encoderMode (driving with encoders) to use imu
-        robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        encoderDrive(1.0, -2.0, -2.0, 10.0);
 
 
         //imu to correct after landed
         telemetry.addData("Robot Turning", "Unknown");
         telemetry.addData("imu angle_other",robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
         telemetry.update();
-        while (opModeIsActive() &&
-                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 0.0){
-            telemetry.addData("Robot Turning", "Left");
-            telemetry.addData("imu angle",robot.imu.getPosition());
-            telemetry.addData("imu angle_other",robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
-            robot.frontLeftDrive.setPower(-SLOW_SPEED);
-            robot.backLeftDrive.setPower(-SLOW_SPEED);
-            robot.frontRightDrive.setPower(SLOW_SPEED);
-            robot.backRightDrive.setPower(SLOW_SPEED);
-            telemetry.update();
-            idle();
-        }
-        robot.frontLeftDrive.setPower(0);
-        robot.backLeftDrive.setPower(0);
-        robot.frontRightDrive.setPower(0);
-        robot.backRightDrive.setPower(0);
 
-        while (opModeIsActive() &&
-                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle > 0.0){
-            telemetry.addData("Robot Turning", "Right");
-            telemetry.addData("imu angle",robot.imu.getPosition());
-            telemetry.addData("imu angle_other",robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
-            robot.frontLeftDrive.setPower(SLOW_SPEED);
-            robot.backLeftDrive.setPower(SLOW_SPEED);
-            robot.frontRightDrive.setPower(-SLOW_SPEED);
-            robot.backRightDrive.setPower(-SLOW_SPEED);
-            telemetry.update();
-            idle();
-        }
-
-        robot.frontLeftDrive.setPower(0);
-        robot.backLeftDrive.setPower(0);
-        robot.frontRightDrive.setPower(0);
-        robot.backRightDrive.setPower(0);
+        turnToAngle(0.0);
 
         telemetry.addData("Robot Turning", "Done");
         telemetry.update();
+
+        sleep(2000);
 
         //Turn on encoderMode (driving with encoders) since imu is finished
         encoderMode();
@@ -273,8 +236,10 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                         if (System.currentTimeMillis() > now + DETECT_GOLD_DELAY){
                             detectedGoldPosition = null;
                             telemetry.addData("Timeout",System.currentTimeMillis());
+                            telemetry.update();
                             break;
                         }
+                        telemetry.addData("Number Detected", updatedRecognitions.size());
                         if (updatedRecognitions.size() == 3) {
                             int goldMineralX = -1;
                             int silverMineral1X = -1;
@@ -316,6 +281,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
                         }
                     }
                 }
+                telemetry.update();
             }
 
         }
@@ -348,7 +314,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
             encoderDrive(DRIVE_SPEED, -22, -22, 10.0);
         }
         if (detectedGoldPosition.equals("Left")){
-            encoderDrive(TURN_SPEED, -3, 3, 10.0);
+            encoderDrive(TURN_SPEED, -4, 4, 10.0);
             encoderDrive(DRIVE_SPEED, -22, -22, 10.0);
         }
     }
@@ -360,8 +326,9 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
             sleep(500);
             robot.markerServo.setPosition(-1);
             sleep(500);
+            turnToAngle(-45);
             //Turn in Depot - Towards Crater
-            encoderDrive(TURN_SPEED, 5, -5, 10.0);
+            //encoderDrive(TURN_SPEED, 5, -5, 10.0);
             //Drive into Crater
             encoderDrive(HIGH_SPEED, 30, 30, 10.0);
             encoderDrive(DRIVE_SPEED, 1, -1, 10.0);
@@ -374,23 +341,68 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
             sleep(500);
             robot.markerServo.setPosition(-1);
             sleep(500);
+            turnToAngle(45);
             //Drive into Crater
             encoderDrive(HIGH_SPEED, 30, 30, 10.0);
-            encoderDrive(DRIVE_SPEED, 1, -1, 10.0);
+            encoderDrive(DRIVE_SPEED, -1, 1, 10.0);
             encoderDrive(HIGH_SPEED, 12, 12, 10.0);
         }
         if (detectedGoldPosition.equals("Left")){
             encoderDrive(DRIVE_SPEED, -5, -5, 10.0);
-            encoderDrive(DRIVE_SPEED, 7, -7, 10.0);
+            //encoderDrive(DRIVE_SPEED, 7, -7, 10.0);
+            turnToAngle(-45);
             encoderDrive(DRIVE_SPEED, -15, -15, 10.0);
             sleep(500);
             robot.markerServo.setPosition(-1);
             sleep(500);
+            turnToAngle(-45);
             //Drive into Crater
             encoderDrive(HIGH_SPEED, 30, 30, 10.0);
             encoderDrive(DRIVE_SPEED, 2, -2, 10.0);
             encoderDrive(HIGH_SPEED, 12, 12, 10.0);
         }
+    }
+
+    private void turnToAngle(double v) {
+        robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        while (opModeIsActive() &&
+                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < v){
+            telemetry.addData("Robot Turning", "Left");
+            telemetry.addData("imu angle",robot.imu.getPosition());
+            telemetry.addData("imu angle_other",robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
+            robot.frontLeftDrive.setPower(-TURN_SPEED);
+            robot.backLeftDrive.setPower(-TURN_SPEED);
+            robot.frontRightDrive.setPower(TURN_SPEED);
+            robot.backRightDrive.setPower(TURN_SPEED);
+            telemetry.update();
+            idle();
+        }
+        robot.frontLeftDrive.setPower(0);
+        robot.backLeftDrive.setPower(0);
+        robot.frontRightDrive.setPower(0);
+        robot.backRightDrive.setPower(0);
+
+        while (opModeIsActive() &&
+                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle > v){
+            telemetry.addData("Robot Turning", "Right");
+            telemetry.addData("imu angle",robot.imu.getPosition());
+            telemetry.addData("imu angle_other",robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
+            robot.frontLeftDrive.setPower(TURN_SPEED);
+            robot.backLeftDrive.setPower(TURN_SPEED);
+            robot.frontRightDrive.setPower(-TURN_SPEED);
+            robot.backRightDrive.setPower(-TURN_SPEED);
+            telemetry.update();
+            idle();
+        }
+
+        robot.frontLeftDrive.setPower(0);
+        robot.backLeftDrive.setPower(0);
+        robot.frontRightDrive.setPower(0);
+        robot.backRightDrive.setPower(0);
     }
 
     private void doCrater() {
