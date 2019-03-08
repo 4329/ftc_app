@@ -97,7 +97,7 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
     static final double SLOW_SPEED = 0.3;
     static final double HIGH_SPEED = 0.8;
     static final double DRIVE_SPEED = 0.6;
-    static final double TURN_SPEED = 0.4;
+    static final double TURN_SPEED = 0.3;
     static final double CRATER = -25;
     static long DETECT_GOLD_DELAY = 3000;
 
@@ -177,8 +177,6 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
 
         telemetry.addData("Robot Turning", "Done");
         telemetry.update();
-
-        sleep(2000);
 
         //Turn on encoderMode (driving with encoders) since imu is finished
         encoderMode();
@@ -323,10 +321,10 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         encoderMode();
         if ( detectedGoldPosition.equals("Center")){
             encoderDrive(DRIVE_SPEED, -26, -26, 10.0);
+            turnToAngle(-45);
             sleep(500);
             robot.markerServo.setPosition(-1);
             sleep(500);
-            turnToAngle(-45);
             //Turn in Depot - Towards Crater
             //encoderDrive(TURN_SPEED, 5, -5, 10.0);
             //Drive into Crater
@@ -364,20 +362,34 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
     }
 
     private void turnToAngle(double v) {
+        int numloops = 0;
+        double powermultiplier = 1;
+        double TURNTOANGLE_SPEED = 0.4;
+
         robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        numloops = 0;
+
         while (opModeIsActive() &&
-                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < v){
+                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < v-5){
+            numloops++;
+            if (numloops > 1){
+                powermultiplier = 1;
+            }
+            else
+                powermultiplier = 1.5;
+
+            telemetry.addData("Numloops",numloops);
             telemetry.addData("Robot Turning", "Left");
             telemetry.addData("imu angle",robot.imu.getPosition());
             telemetry.addData("imu angle_other",robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
-            robot.frontLeftDrive.setPower(-TURN_SPEED);
-            robot.backLeftDrive.setPower(-TURN_SPEED);
-            robot.frontRightDrive.setPower(TURN_SPEED);
-            robot.backRightDrive.setPower(TURN_SPEED);
+            robot.frontLeftDrive.setPower(-TURNTOANGLE_SPEED*powermultiplier);
+            robot.backLeftDrive.setPower(-TURNTOANGLE_SPEED*powermultiplier);
+            robot.frontRightDrive.setPower(TURNTOANGLE_SPEED*powermultiplier);
+            robot.backRightDrive.setPower(TURNTOANGLE_SPEED*powermultiplier);
             telemetry.update();
             idle();
         }
@@ -386,15 +398,25 @@ public class BasicAutoEncoder_Linear extends LinearOpMode {
         robot.frontRightDrive.setPower(0);
         robot.backRightDrive.setPower(0);
 
+        numloops = 0;
+
         while (opModeIsActive() &&
-                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle > v){
+                robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle > v+5){
+            numloops++;
+            if (numloops > 1){
+                powermultiplier = 1;
+            }
+            else
+                powermultiplier = 1.5;
+
+            telemetry.addData("Numloops",numloops);
             telemetry.addData("Robot Turning", "Right");
             telemetry.addData("imu angle",robot.imu.getPosition());
             telemetry.addData("imu angle_other",robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
-            robot.frontLeftDrive.setPower(TURN_SPEED);
-            robot.backLeftDrive.setPower(TURN_SPEED);
-            robot.frontRightDrive.setPower(-TURN_SPEED);
-            robot.backRightDrive.setPower(-TURN_SPEED);
+            robot.frontLeftDrive.setPower(TURNTOANGLE_SPEED*powermultiplier);
+            robot.backLeftDrive.setPower(TURNTOANGLE_SPEED*powermultiplier);
+            robot.frontRightDrive.setPower(-TURNTOANGLE_SPEED*powermultiplier);
+            robot.backRightDrive.setPower(-TURNTOANGLE_SPEED*powermultiplier);
             telemetry.update();
             idle();
         }
